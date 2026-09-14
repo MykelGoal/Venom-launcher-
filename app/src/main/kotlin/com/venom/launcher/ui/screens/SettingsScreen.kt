@@ -54,6 +54,7 @@ fun SettingsScreen(
     hasUsageAccess: Boolean,
     isNotificationListenerEnabled: Boolean,
     isDeviceAdmin: Boolean,
+    hasOverlayPermission: Boolean,
     modifier: Modifier = Modifier,
     onUpdate: ((LauncherSettings) -> LauncherSettings) -> Unit,
     onSetIconPack: (String?) -> Unit,
@@ -65,6 +66,9 @@ fun SettingsScreen(
     onRequestNotifications: () -> Unit,
     onRequestDeviceAdmin: () -> Unit,
     onOpenChargeLab: () -> Unit,
+    onOpenGames: () -> Unit,
+    onToggleGameMode: (Boolean) -> Unit,
+    onRequestOverlay: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
     onBack: () -> Unit,
@@ -262,6 +266,45 @@ fun SettingsScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     SmallAction("Open Charge Lab", accent, Modifier.fillMaxWidth()) { onOpenChargeLab() }
+                }
+            }
+
+            // --------------------------------------------------- gaming ----
+            item { Section("GAMING") }
+            item {
+                Card {
+                    SettingToggle("Game Mode", settings.gameModeEnabled) {
+                        onToggleGameMode(!settings.gameModeEnabled)
+                    }
+                    Text(
+                        "FPS + temperature HUD over any game, session tracking, and notifications pushed aside while you play.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.45f),
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    if (!hasOverlayPermission) {
+                        SmallAction("Grant overlay permission", accent, Modifier.fillMaxWidth()) {
+                            onRequestOverlay()
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    SettingToggle("Auto-detect games", settings.autoGameMode) {
+                        onUpdate { s -> s.copy(autoGameMode = !s.autoGameMode) }
+                    }
+                    SettingToggle("Show FPS in HUD", settings.overlayShowFps) {
+                        onUpdate { s -> s.copy(overlayShowFps = !s.overlayShowFps) }
+                    }
+                    SettingToggle("Show temperature in HUD", settings.overlayShowTemp) {
+                        onUpdate { s -> s.copy(overlayShowTemp = !s.overlayShowTemp) }
+                    }
+                    SettingToggle("Show battery in HUD", settings.overlayShowBattery) {
+                        onUpdate { s -> s.copy(overlayShowBattery = !s.overlayShowBattery) }
+                    }
+                    SettingToggle("Push notifications aside while gaming", settings.blockNotificationsWhileGaming) {
+                        onUpdate { s -> s.copy(blockNotificationsWhileGaming = !s.blockNotificationsWhileGaming) }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    SmallAction("Open Game Library", accent, Modifier.fillMaxWidth()) { onOpenGames() }
                 }
             }
 

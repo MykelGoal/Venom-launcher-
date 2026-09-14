@@ -136,6 +136,23 @@ fun Context.openNotificationListenerSettings() {
     }
 }
 
+fun Context.canDrawOverlays(): Boolean =
+    android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M ||
+        android.provider.Settings.canDrawOverlays(this)
+
+/** Game Mode's HUD needs "draw over other apps". */
+fun Context.requestOverlayPermission() {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
+    runCatching {
+        startActivity(
+            Intent(
+                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
+    }
+}
+
 fun Context.openUsageAccessSettings() {
     runCatching {
         startActivity(

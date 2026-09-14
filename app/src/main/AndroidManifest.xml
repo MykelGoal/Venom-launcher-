@@ -9,6 +9,9 @@
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Granted by the user in Settings; powers the prediction row and app stats. -->
     <uses-permission
@@ -88,6 +91,16 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <!-- Game Mode: FPS/thermal HUD over other apps + session tracking -->
+        <service
+            android:name=".service.GameModeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="game performance overlay and session tracking" />
+        </service>
 
         <!-- Counts notifications so Venom can dot home-screen icons. Off by default:
              the user has to enable it in Notification access settings. -->

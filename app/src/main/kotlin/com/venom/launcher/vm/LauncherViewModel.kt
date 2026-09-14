@@ -21,6 +21,12 @@ import com.venom.launcher.data.ChargeSample
 import com.venom.launcher.data.ChargePrefs
 import com.venom.launcher.data.ChargeSession
 import com.venom.launcher.data.FolderItem
+import com.venom.launcher.data.GameInfo
+import com.venom.launcher.data.GameRepository
+import com.venom.launcher.data.GameSession
+import com.venom.launcher.data.GameStats
+import com.venom.launcher.data.GameStore
+import com.venom.launcher.data.GameTelemetry
 import com.venom.launcher.data.HomeLayout
 import com.venom.launcher.data.IconPack
 import com.venom.launcher.data.IconPackManager
@@ -51,6 +57,8 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
     private val appRepo = AppRepository(app)
     val usageRepo = UsageRepository(app)
     private val charge: ChargeRepository = (app as VenomApp).chargeRepository
+    private val gameRepo = GameRepository(app)
+    private val gameStore = GameStore(app)
 
     // ------------------------------------------------------------- streams ----
 
@@ -77,6 +85,15 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private val _widgets = MutableStateFlow<List<AppWidgetProviderInfo>>(emptyList())
     val widgets: StateFlow<List<AppWidgetProviderInfo>> = _widgets.asStateFlow()
+
+    private val _games = MutableStateFlow<List<GameInfo>>(emptyList())
+    val games: StateFlow<List<GameInfo>> = _games.asStateFlow()
+
+    val gameSessions: StateFlow<List<GameSession>> = gameStore.sessions
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val gameTelemetry: StateFlow<GameTelemetry> = VenomBus.gameTelemetry
+    val gamingPackage: StateFlow<String?> = VenomBus.gamingPackage
 
     private val _isDefaultLauncher = MutableStateFlow(false)
     val isDefaultLauncher: StateFlow<Boolean> = _isDefaultLauncher.asStateFlow()
@@ -119,6 +136,7 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
         val loaded = appRepo.loadApps()
         _apps.value = loaded
         ensureFirstRun(loaded)
+        _games.value = gameRepo.loadGames()
         if (usageRepo.hasPermission()) {
             _usage.value = usageRepo.loadUsage(days = 7)
             _hourly.value = usageRepo.loadHourlyAffinity(days = 14)
@@ -142,6 +160,28 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
 
         prefs.updateLayout { HomeLayout(pages = listOf(home), dock = dock) }
         prefs.update { it.copy(firstRunDone = true) }
+    }
+
+    // -------------------------------------------------------------- gaming ----
+
+    fun statsFor(packageName: String): GameStats =
+        gameRepo.statsFor(gameSessions.value, packageName)
+
+    fun gameBanner(packageName: String): android.graphics.drawable.Drawable? =
+        gameRepo.banner(packageName)
+
+    /** Flipping this starts or stops the monitoring service. */
+    fun setGameMode(enabled: Boolean) {
+        update { it.copy(gameModeEnabled = enabled) }
+        if (enabled) {
+            com.venom.launcher.service.GameModeService.start(app)
+        } else {
+            com.venom.launcher.service.GameModeService.stop(app)
+        }
+    }
+
+    fun clearGameHistory() {
+        viewModelScope.launch { runCatching { gameStore.clear() } }
     }
 
     fun appByKey(key: String): AppInfo? =

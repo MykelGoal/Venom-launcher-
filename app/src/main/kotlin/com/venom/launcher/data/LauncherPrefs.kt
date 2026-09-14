@@ -65,6 +65,12 @@ private object Keys {
     val PREDICTIVE_ROW = booleanPreferencesKey("predictive_row")
     val HAPTICS = booleanPreferencesKey("haptics")
     val DOUBLE_TAP_LOCK = booleanPreferencesKey("double_tap_lock")
+    val GAME_MODE = booleanPreferencesKey("game_mode")
+    val AUTO_GAME = booleanPreferencesKey("auto_game")
+    val OVERLAY_FPS = booleanPreferencesKey("overlay_fps")
+    val OVERLAY_TEMP = booleanPreferencesKey("overlay_temp")
+    val OVERLAY_BATTERY = booleanPreferencesKey("overlay_battery")
+    val BLOCK_NOTIFS = booleanPreferencesKey("block_notifs_gaming")
     val FIRST_RUN = booleanPreferencesKey("first_run_done")
 }
 
@@ -145,6 +151,12 @@ private fun Preferences.toSettings() = LauncherSettings(
     predictiveRow = this[Keys.PREDICTIVE_ROW] ?: true,
     haptics = this[Keys.HAPTICS] ?: true,
     doubleTapLockEnabled = this[Keys.DOUBLE_TAP_LOCK] ?: false,
+    gameModeEnabled = this[Keys.GAME_MODE] ?: false,
+    autoGameMode = this[Keys.AUTO_GAME] ?: true,
+    overlayShowFps = this[Keys.OVERLAY_FPS] ?: true,
+    overlayShowTemp = this[Keys.OVERLAY_TEMP] ?: true,
+    overlayShowBattery = this[Keys.OVERLAY_BATTERY] ?: true,
+    blockNotificationsWhileGaming = this[Keys.BLOCK_NOTIFS] ?: true,
     firstRunDone = this[Keys.FIRST_RUN] ?: false,
 )
 
@@ -182,6 +194,12 @@ private fun MutablePreferences.writeFrom(s: LauncherSettings) {
     this[Keys.PREDICTIVE_ROW] = s.predictiveRow
     this[Keys.HAPTICS] = s.haptics
     this[Keys.DOUBLE_TAP_LOCK] = s.doubleTapLockEnabled
+    this[Keys.GAME_MODE] = s.gameModeEnabled
+    this[Keys.AUTO_GAME] = s.autoGameMode
+    this[Keys.OVERLAY_FPS] = s.overlayShowFps
+    this[Keys.OVERLAY_TEMP] = s.overlayShowTemp
+    this[Keys.OVERLAY_BATTERY] = s.overlayShowBattery
+    this[Keys.BLOCK_NOTIFS] = s.blockNotificationsWhileGaming
     this[Keys.FIRST_RUN] = s.firstRunDone
     if (s.iconPack != null) this[Keys.ICON_PACK] = s.iconPack else this.remove(Keys.ICON_PACK)
 }

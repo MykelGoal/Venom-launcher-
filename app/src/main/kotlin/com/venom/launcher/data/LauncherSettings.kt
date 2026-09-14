@@ -39,6 +39,7 @@ enum class GestureAction(val label: String) {
     SEARCH("Open search"),
     CHARGE_LAB("Open Charge Lab"),
     APP_STATS("Open app stats"),
+    GAME_LIBRARY("Open game library"),
     ;
 
     companion object {
@@ -97,6 +98,13 @@ data class LauncherSettings(
     val notificationBadges: Boolean = true,
     val predictiveRow: Boolean = true,
     val haptics: Boolean = true,
+    // --- gaming ---
+    val gameModeEnabled: Boolean = false,
+    val autoGameMode: Boolean = true,
+    val overlayShowFps: Boolean = true,
+    val overlayShowTemp: Boolean = true,
+    val overlayShowBattery: Boolean = true,
+    val blockNotificationsWhileGaming: Boolean = true,
     // --- misc ---
     val doubleTapLockEnabled: Boolean = false,
     val firstRunDone: Boolean = false,

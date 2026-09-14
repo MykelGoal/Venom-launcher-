@@ -73,6 +73,9 @@ class MainActivity : ComponentActivity() {
         if (i.getBooleanExtra(EXTRA_OPEN_CHARGE_LAB, false)) {
             VenomBus.openChargeLab()
         }
+        if (i.getBooleanExtra(EXTRA_OPEN_GAMES, false)) {
+            VenomBus.openGames()
+        }
         if (i.action == Intent.ACTION_MAIN &&
             i.categories?.contains(Intent.CATEGORY_HOME) == true
         ) {
@@ -105,5 +108,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_OPEN_CHARGE_LAB = "extra_open_charge_lab"
+        const val EXTRA_OPEN_GAMES = "extra_open_games"
     }
 }

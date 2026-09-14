@@ -11,11 +11,23 @@ import com.venom.launcher.data.VenomBus
  */
 class VenomNotificationService : NotificationListenerService() {
 
-    override fun onListenerConnected() = publish()
-    override fun onNotificationPosted(sbn: StatusBarNotification?) = publish()
+    override fun onListenerConnected() {
+        instance = this
+        publish()
+    }
     override fun onNotificationRemoved(sbn: StatusBarNotification?) = publish()
     override fun onListenerDisconnected() {
+        instance = null
         VenomBus.updateBadges(emptyMap())
+    }
+
+    override fun onNotificationPosted(sbn: StatusBarNotification?) {
+        publish()
+        // Game Mode: push incoming notifications out of the way while playing
+        val pkg = com.venom.launcher.data.VenomBus.gamingPackage.value
+        if (pkg != null && sbn?.isClearable == true) {
+            runCatching { snoozeNotification(sbn.key, SNOOZE_WHILE_GAMING_MS) }
+        }
     }
 
     private fun publish() {
@@ -30,6 +42,19 @@ class VenomNotificationService : NotificationListenerService() {
     }
 
     companion object {
-        fun isSupported() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+        private const val SNOOZE_WHILE_GAMING_MS = 3 * 60 * 60 * 1000L
+
+        @Volatile
+        private var instance: VenomNotificationService? = null
+
+        /** Snoozes everything currently in the shade (used when a game launches). */
+        fun snoozeActive(durationMs: Long) {
+            val svc = instance ?: return
+            val active = runCatching { svc.activeNotifications }.getOrNull() ?: return
+            for (sbn in active) {
+                if (!sbn.isClearable) continue
+                runCatching { svc.snoozeNotification(sbn.key, durationMs) }
+            }
+        }
     }
 }

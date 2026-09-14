@@ -66,8 +66,10 @@ import com.venom.launcher.ui.components.AppIcon
 import com.venom.launcher.ui.components.PickerSheet
 import com.venom.launcher.ui.screens.ChargeLabScreen
 import com.venom.launcher.ui.screens.DrawerScreen
+import com.venom.launcher.ui.screens.GameLibraryScreen
 import com.venom.launcher.ui.screens.HomeScreen
 import com.venom.launcher.ui.screens.SettingsScreen
+import com.venom.launcher.util.canDrawOverlays
 import com.venom.launcher.util.expandNotifications
 import com.venom.launcher.util.expandQuickSettings
 import com.venom.launcher.util.isDeviceAdminActive
@@ -77,6 +79,7 @@ import com.venom.launcher.util.openAppInfo
 import com.venom.launcher.util.openNotificationListenerSettings
 import com.venom.launcher.util.openUsageAccessSettings
 import com.venom.launcher.util.openWallpaperPicker
+import com.venom.launcher.util.requestOverlayPermission
 import com.venom.launcher.util.requestDefaultLauncher
 import com.venom.launcher.util.requestDeviceAdmin
 import com.venom.launcher.util.requestUninstall
@@ -85,7 +88,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.ceil
 
-private enum class Screen { HOME, SETTINGS, CHARGE_LAB, STATS }
+private enum class Screen { HOME, SETTINGS, CHARGE_LAB, STATS, GAMES }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -105,6 +108,10 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
     val sessions by vm.chargeSessions.collectAsState()
     val badges by vm.badges.collectAsState()
     val usage by vm.usage.collectAsState()
+    val games by vm.games.collectAsState()
+    val gameSessions by vm.gameSessions.collectAsState()
+    val gameTelemetry by vm.gameTelemetry.collectAsState()
+    val gamingPackage by vm.gamingPackage.collectAsState()
 
     val appsByKey = remember(apps) { apps.associateBy { it.componentKey } }
     val pageCount = layout.pages.size
@@ -138,6 +145,12 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
         VenomBus.openChargeLab.collect {
             drawerOpen = false
             screen = Screen.CHARGE_LAB
+        }
+    }
+    LaunchedEffect(Unit) {
+        VenomBus.openGames.collect {
+            drawerOpen = false
+            screen = Screen.GAMES
         }
     }
     LaunchedEffect(battery.isCharging) {
@@ -289,6 +302,7 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
 
             GestureAction.CHARGE_LAB -> screen = Screen.CHARGE_LAB
             GestureAction.APP_STATS -> screen = Screen.STATS
+            GestureAction.GAME_LIBRARY -> screen = Screen.GAMES
         }
     }
 
@@ -296,6 +310,21 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
         haptic()
         context.launchApp(app)
         drawerOpen = false
+    }
+
+    fun launchGame(game: com.venom.launcher.data.GameInfo) {
+        haptic()
+        context.launchApp(
+            com.venom.launcher.data.AppInfo(
+                label = game.label,
+                packageName = game.packageName,
+                activityName = game.activityName,
+                isSystemApp = false,
+            )
+        )
+        if (settings.gameModeEnabled) {
+            com.venom.launcher.service.GameModeService.start(context)
+        }
     }
 
     // -------------------------------------------------------------------- UI ----
@@ -512,6 +541,7 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 hasUsageAccess = remember { vm.usageRepo.hasPermission() },
                 isNotificationListenerEnabled = remember(context) { isNotificationListenerEnabled(context) },
                 isDeviceAdmin = remember(context) { context.isDeviceAdminActive() },
+                hasOverlayPermission = remember(context) { context.canDrawOverlays() },
                 onUpdate = { vm.update(it) },
                 onSetIconPack = { vm.setIconPack(it) },
                 onGridSize = { c, r -> vm.setGridSize(c, r) },
@@ -522,6 +552,9 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 onRequestNotifications = { context.openNotificationListenerSettings() },
                 onRequestDeviceAdmin = { context.requestDeviceAdmin() },
                 onOpenChargeLab = { screen = Screen.CHARGE_LAB },
+                onOpenGames = { screen = Screen.GAMES },
+                onToggleGameMode = { vm.setGameMode(it) },
+                onRequestOverlay = { context.requestOverlayPermission() },
                 onExport = { exportLauncher.launch("venom-layout.json") },
                 onImport = { importLauncher.launch(arrayOf("application/json", "*/*")) },
                 onBack = { screen = Screen.HOME },
@@ -540,6 +573,32 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 limitEnabled = settings.chargeLimitEnabled,
                 limitPercent = settings.chargeLimitPercent,
                 onLimitChanged = { enabled, percent -> vm.setChargeLimit(enabled, percent) },
+                onBack = { screen = Screen.HOME },
+            )
+        }
+
+        AnimatedVisibility(
+            visible = screen == Screen.GAMES,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+        ) {
+            GameLibraryScreen(
+                games = games,
+                sessions = gameSessions,
+                telemetry = gameTelemetry,
+                gamingPackage = gamingPackage,
+                gameModeEnabled = settings.gameModeEnabled,
+                hasOverlayPermission = remember(context) { context.canDrawOverlays() },
+                onStatsFor = { vm.statsFor(it) },
+                onBanner = { vm.gameBanner(it) },
+                settings = settings,
+                appsByKey = appsByKey,
+                packs = packs,
+                badges = badges,
+                onLaunch = { launchGame(it) },
+                onToggleGameMode = { vm.setGameMode(it) },
+                onRequestOverlay = { context.requestOverlayPermission() },
+                onOpenSettings = { screen = Screen.SETTINGS },
                 onBack = { screen = Screen.HOME },
             )
         }
