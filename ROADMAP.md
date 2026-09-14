@@ -40,15 +40,15 @@
 - [x] Notification snoozing while gaming
 - [x] Game Library with lifetime per-game stats
 
-## Batch 3 — Game Turbo  *(in progress)*
-- [ ] Floating draggable Turbo bubble → expands into a control panel
-- [ ] Boost: clear cached background processes when a game opens
-- [ ] Do Not Disturb while gaming (real zen mode, restored after)
-- [ ] Brightness lock per game (restored after)
-- [ ] Mute / unmute from the bubble
-- [ ] Thermal guard alert (sustained 43 °C)
-- [ ] Post-session summary notification
-- [ ] Per-game profiles (each game remembers its own boost / DND / brightness)
+## Batch 3 — Game Turbo  *(shipped in v0.3.0)*
+- [x] Floating draggable Turbo bubble → expands into a control panel
+- [x] Boost: clear cached background processes when a game opens
+- [x] Do Not Disturb while gaming (real zen mode, restored after)
+- [x] Brightness lock per game (restored after)
+- [x] Mute / unmute from the bubble
+- [x] Thermal guard alert (sustained 43 °C)
+- [x] Post-session summary notification
+- [x] Per-game profiles (each game remembers its own boost / DND / brightness)
 
 ## Batch 4 — Find anything instantly
 - [ ] Universal search bar: apps, contacts, settings, web, calculator
