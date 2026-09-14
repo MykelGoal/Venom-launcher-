@@ -26,6 +26,28 @@ class GameStore(private val context: Context) {
 
     suspend fun current(): List<GameSession> = sessions.first()
 
+    /** Per-game Turbo settings, keyed by package name. */
+    val profiles: Flow<Map<String, GameProfile>> = context.gameStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs -> decodeProfiles(prefs[PROFILE_KEY]) }
+
+    suspend fun profileFor(packageName: String): GameProfile =
+        profiles.first()[packageName] ?: GameProfile.defaultFor(packageName)
+
+    suspend fun saveProfile(profile: GameProfile) {
+        context.gameStore.edit { prefs ->
+            val next = decodeProfiles(prefs[PROFILE_KEY]) + (profile.packageName to profile)
+            prefs[PROFILE_KEY] = VenomJson.Json.encodeToString(GameProfileMap(next))
+        }
+    }
+
+    suspend fun removeProfile(packageName: String) {
+        context.gameStore.edit { prefs ->
+            val next = decodeProfiles(prefs[PROFILE_KEY]) - packageName
+            prefs[PROFILE_KEY] = VenomJson.Json.encodeToString(GameProfileMap(next))
+        }
+    }
+
     suspend fun add(session: GameSession) {
         context.gameStore.edit { prefs ->
             val next = (current() + session).takeLast(400)
@@ -37,8 +59,13 @@ class GameStore(private val context: Context) {
         context.gameStore.edit { it.clear() }
     }
 
+    private fun decodeProfiles(raw: String?): Map<String, GameProfile> =
+        raw?.let { runCatching { VenomJson.Json.decodeFromString<GameProfileMap>(it) }.getOrNull() }
+            ?.profiles ?: emptyMap()
+
     private companion object {
         val KEY = stringPreferencesKey("sessions_json")
+        val PROFILE_KEY = stringPreferencesKey("profiles_json")
     }
 }
 

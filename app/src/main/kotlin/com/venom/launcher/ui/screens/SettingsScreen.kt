@@ -55,6 +55,8 @@ fun SettingsScreen(
     isNotificationListenerEnabled: Boolean,
     isDeviceAdmin: Boolean,
     hasOverlayPermission: Boolean,
+    hasDndAccess: Boolean = false,
+    onRequestDnd: () -> Unit = {},
     modifier: Modifier = Modifier,
     onUpdate: ((LauncherSettings) -> LauncherSettings) -> Unit,
     onSetIconPack: (String?) -> Unit,
@@ -302,6 +304,30 @@ fun SettingsScreen(
                     }
                     SettingToggle("Push notifications aside while gaming", settings.blockNotificationsWhileGaming) {
                         onUpdate { s -> s.copy(blockNotificationsWhileGaming = !s.blockNotificationsWhileGaming) }
+                    }
+                    SettingToggle("Floating Turbo bubble", settings.gameBubbleEnabled) {
+                        onUpdate { s -> s.copy(gameBubbleEnabled = !s.gameBubbleEnabled) }
+                    }
+                    Text(
+                        "A draggable pill over any game. Tap it for boost, do-not-disturb, brightness, mute and session controls.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.45f),
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    SettingToggle("Boost before a game opens", settings.boostOnLaunch) {
+                        onUpdate { s -> s.copy(boostOnLaunch = !s.boostOnLaunch) }
+                    }
+                    SettingToggle("Warn when the device runs hot", settings.thermalGuardEnabled) {
+                        onUpdate { s -> s.copy(thermalGuardEnabled = !s.thermalGuardEnabled) }
+                    }
+                    SettingToggle("Do not disturb while gaming", settings.dndWhileGaming) {
+                        onUpdate { s -> s.copy(dndWhileGaming = !s.dndWhileGaming) }
+                    }
+                    if (settings.dndWhileGaming && !hasDndAccess) {
+                        Spacer(Modifier.height(8.dp))
+                        SmallAction("Grant do-not-disturb access", accent, Modifier.fillMaxWidth()) {
+                            onRequestDnd()
+                        }
                     }
                     Spacer(Modifier.height(10.dp))
                     SmallAction("Open Game Library", accent, Modifier.fillMaxWidth()) { onOpenGames() }

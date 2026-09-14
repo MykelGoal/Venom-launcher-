@@ -71,6 +71,10 @@ private object Keys {
     val OVERLAY_TEMP = booleanPreferencesKey("overlay_temp")
     val OVERLAY_BATTERY = booleanPreferencesKey("overlay_battery")
     val BLOCK_NOTIFS = booleanPreferencesKey("block_notifs_gaming")
+    val GAME_BUBBLE = booleanPreferencesKey("game_bubble")
+    val GAME_BOOST = booleanPreferencesKey("game_boost")
+    val GAME_DND = booleanPreferencesKey("game_dnd")
+    val THERMAL_GUARD = booleanPreferencesKey("thermal_guard")
     val FIRST_RUN = booleanPreferencesKey("first_run_done")
 }
 
@@ -157,6 +161,10 @@ private fun Preferences.toSettings() = LauncherSettings(
     overlayShowTemp = this[Keys.OVERLAY_TEMP] ?: true,
     overlayShowBattery = this[Keys.OVERLAY_BATTERY] ?: true,
     blockNotificationsWhileGaming = this[Keys.BLOCK_NOTIFS] ?: true,
+    gameBubbleEnabled = this[Keys.GAME_BUBBLE] ?: true,
+    boostOnLaunch = this[Keys.GAME_BOOST] ?: true,
+    dndWhileGaming = this[Keys.GAME_DND] ?: false,
+    thermalGuardEnabled = this[Keys.THERMAL_GUARD] ?: true,
     firstRunDone = this[Keys.FIRST_RUN] ?: false,
 )
 
@@ -200,6 +208,10 @@ private fun MutablePreferences.writeFrom(s: LauncherSettings) {
     this[Keys.OVERLAY_TEMP] = s.overlayShowTemp
     this[Keys.OVERLAY_BATTERY] = s.overlayShowBattery
     this[Keys.BLOCK_NOTIFS] = s.blockNotificationsWhileGaming
+    this[Keys.GAME_BUBBLE] = s.gameBubbleEnabled
+    this[Keys.GAME_BOOST] = s.boostOnLaunch
+    this[Keys.GAME_DND] = s.dndWhileGaming
+    this[Keys.THERMAL_GUARD] = s.thermalGuardEnabled
     this[Keys.FIRST_RUN] = s.firstRunDone
     if (s.iconPack != null) this[Keys.ICON_PACK] = s.iconPack else this.remove(Keys.ICON_PACK)
 }

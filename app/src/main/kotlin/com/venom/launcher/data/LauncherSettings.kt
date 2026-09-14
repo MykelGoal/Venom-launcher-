@@ -105,6 +105,10 @@ data class LauncherSettings(
     val overlayShowTemp: Boolean = true,
     val overlayShowBattery: Boolean = true,
     val blockNotificationsWhileGaming: Boolean = true,
+    val gameBubbleEnabled: Boolean = true,
+    val boostOnLaunch: Boolean = true,
+    val dndWhileGaming: Boolean = false,
+    val thermalGuardEnabled: Boolean = true,
     // --- misc ---
     val doubleTapLockEnabled: Boolean = false,
     val firstRunDone: Boolean = false,

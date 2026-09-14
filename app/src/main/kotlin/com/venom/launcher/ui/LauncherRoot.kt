@@ -83,6 +83,7 @@ import com.venom.launcher.util.requestOverlayPermission
 import com.venom.launcher.util.requestDefaultLauncher
 import com.venom.launcher.util.requestDeviceAdmin
 import com.venom.launcher.util.requestUninstall
+import com.venom.launcher.util.GameControls
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -112,6 +113,7 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
     val gameSessions by vm.gameSessions.collectAsState()
     val gameTelemetry by vm.gameTelemetry.collectAsState()
     val gamingPackage by vm.gamingPackage.collectAsState()
+    val gameProfiles by vm.gameProfiles.collectAsState()
 
     val appsByKey = remember(apps) { apps.associateBy { it.componentKey } }
     val pageCount = layout.pages.size
@@ -542,6 +544,8 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 isNotificationListenerEnabled = remember(context) { isNotificationListenerEnabled(context) },
                 isDeviceAdmin = remember(context) { context.isDeviceAdminActive() },
                 hasOverlayPermission = remember(context) { context.canDrawOverlays() },
+                hasDndAccess = remember(context) { GameControls.hasDndAccess(context) },
+                onRequestDnd = { GameControls.requestDndAccess(context) },
                 onUpdate = { vm.update(it) },
                 onSetIconPack = { vm.setIconPack(it) },
                 onGridSize = { c, r -> vm.setGridSize(c, r) },
@@ -589,6 +593,8 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 gamingPackage = gamingPackage,
                 gameModeEnabled = settings.gameModeEnabled,
                 hasOverlayPermission = remember(context) { context.canDrawOverlays() },
+                profiles = gameProfiles,
+                onProfileChange = { vm.setProfile(it) },
                 onStatsFor = { vm.statsFor(it) },
                 onBanner = { vm.gameBanner(it) },
                 settings = settings,

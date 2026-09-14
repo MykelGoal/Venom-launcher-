@@ -128,4 +128,6 @@
         </receiver>
     </application>
 
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 </manifest>

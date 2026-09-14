@@ -25,6 +25,7 @@ import com.venom.launcher.data.GameInfo
 import com.venom.launcher.data.GameRepository
 import com.venom.launcher.data.GameSession
 import com.venom.launcher.data.GameStats
+import com.venom.launcher.data.GameProfile
 import com.venom.launcher.data.GameStore
 import com.venom.launcher.data.GameTelemetry
 import com.venom.launcher.data.HomeLayout
@@ -94,6 +95,9 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
 
     val gameTelemetry: StateFlow<GameTelemetry> = VenomBus.gameTelemetry
     val gamingPackage: StateFlow<String?> = VenomBus.gamingPackage
+
+    val gameProfiles: StateFlow<Map<String, GameProfile>> = gameStore.profiles
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     private val _isDefaultLauncher = MutableStateFlow(false)
     val isDefaultLauncher: StateFlow<Boolean> = _isDefaultLauncher.asStateFlow()
@@ -171,6 +175,10 @@ class LauncherViewModel(private val app: Application) : AndroidViewModel(app) {
         gameRepo.banner(packageName)
 
     /** Flipping this starts or stops the monitoring service. */
+    fun setProfile(profile: GameProfile) {
+        viewModelScope.launch { runCatching { gameStore.saveProfile(profile) } }
+    }
+
     fun setGameMode(enabled: Boolean) {
         update { it.copy(gameModeEnabled = enabled) }
         if (enabled) {

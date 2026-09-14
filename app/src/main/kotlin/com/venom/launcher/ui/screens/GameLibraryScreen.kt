@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.venom.launcher.data.GameInfo
+import com.venom.launcher.data.GameProfile
 import com.venom.launcher.data.GameSession
 import com.venom.launcher.data.GameStats
 import com.venom.launcher.data.GameTelemetry
@@ -67,6 +68,8 @@ fun GameLibraryScreen(
     packs: List<com.venom.launcher.data.IconPackRef>,
     badges: Map<String, Int>,
     modifier: Modifier = Modifier,
+    profiles: Map<String, GameProfile> = emptyMap(),
+    onProfileChange: (GameProfile) -> Unit = {},
     onLaunch: (GameInfo) -> Unit,
     onToggleGameMode: (Boolean) -> Unit,
     onRequestOverlay: () -> Unit,
@@ -208,6 +211,8 @@ fun GameLibraryScreen(
                     stats = onStatsFor(game.packageName),
                     banner = onBanner(game.packageName),
                     accent = accent,
+                    profile = profiles[game.packageName],
+                    onProfileChange = onProfileChange,
                     onClick = { onLaunch(game) },
                     onLongPress = { optionsGame = game },
                 )
@@ -307,7 +312,12 @@ private fun GameCard(
     accent: Color,
     onClick: () -> Unit,
     onLongPress: () -> Unit,
+    profile: GameProfile? = null,
+    onProfileChange: (GameProfile) -> Unit = {},
 ) {
+    val base = profile ?: GameProfile.defaultFor(game.packageName)
+    val boostOn = base.boostOnLaunch ?: true
+    val dndOn = base.dndWhilePlaying ?: false
     val bitmap = remember(game.packageName) {
         runCatching {
             val d = banner ?: return@runCatching null
@@ -386,5 +396,51 @@ private fun GameCard(
             }
             Text("▸", color = Color.White.copy(alpha = 0.4f), fontSize = 18.sp)
         }
+
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ProfileChip(
+                label = "BOOST",
+                active = boostOn,
+                accent = accent,
+                onClick = { onProfileChange(base.copy(boostOnLaunch = !boostOn)) },
+            )
+            ProfileChip(
+                label = "DND",
+                active = dndOn,
+                accent = accent,
+                onClick = { onProfileChange(base.copy(dndWhilePlaying = !dndOn)) },
+            )
+            ProfileChip(
+                label = "MUTE",
+                active = base.muteOnLaunch ?: false,
+                accent = accent,
+                onClick = { onProfileChange(base.copy(muteOnLaunch = !(base.muteOnLaunch ?: false))) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileChip(
+    label: String,
+    active: Boolean,
+    accent: Color,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(9.dp))
+            .background(if (active) accent.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.05f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 11.dp, vertical = 5.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontFamily = FontFamily.Monospace,
+            color = if (active) Color(0xFF06080A) else Color.White.copy(alpha = 0.55f),
+        )
     }
 }
