@@ -379,6 +379,8 @@ fun LauncherRoot(vm: com.venom.launcher.vm.LauncherViewModel) {
                 settings = settings,
                 pack = pack,
                 badges = if (settings.notificationBadges) badges else emptyMap(),
+                usage = usage,
+                gamePackages = games.map { it.packageName }.toSet(),
                 onLaunch = { launch(it) },
                 onLongPress = { optionsApp = it },
                 onOpenSettings = { screen = Screen.SETTINGS },

@@ -50,12 +50,12 @@
 - [x] Post-session summary notification
 - [x] Per-game profiles (each game remembers its own boost / DND / brightness)
 
-## Batch 4 — Find anything instantly
-- [ ] Universal search bar: apps, contacts, settings, web, calculator
-- [ ] T9 / fuzzy matching, ranked by your own usage
-- [ ] A–Z fast-scroller down the side of the drawer
-- [ ] Category tabs in the drawer (Games / Social / Tools / Recent)
-- [ ] Search actions: uninstall, app info, add to home, shortcuts
+## Batch 4 — Find anything instantly  *(shipped in v0.4.0)*
+- [x] Universal search bar: apps, contacts, settings, web, calculator
+- [x] T9 / fuzzy matching, ranked by your own usage
+- [x] A–Z fast-scroller down the side of the drawer
+- [x] Category tabs in the drawer (Games / Social / Tools / Recent)
+- [x] Search actions: uninstall, app info, add to home, shortcuts
 
 ## Batch 5 — Notifications done properly
 - [ ] Real notification shade (own UI, not the reflection hack)
