@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Venom</string>
+    <string name="device_admin_label">Venom Lock</string>
+    <string name="device_admin_description">Allows Venom to lock the screen on double tap.</string>
+</resources>
